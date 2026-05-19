@@ -1,0 +1,6 @@
+{
+  "name": "Fútbol Team Manager",
+  "description": "Aplicación profesional para la gestión de equipos de fútbol con autenticación, base de datos de jugadores y almacenamiento de fotos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

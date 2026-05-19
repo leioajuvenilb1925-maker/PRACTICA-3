@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --color-bento-bg: #020617;
+  --color-bento-card: #0f172a;
+  --color-bento-border: #1e293b;
+  --color-bento-accent: #6366f1;
+}
+
+body {
+  background-color: var(--color-bento-bg);
+  color: #f1f5f9;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+}
