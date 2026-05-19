@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Jugador } from '../types';
-import { X, Calendar, Shield, Ruler, User, MessageSquare, Star } from 'lucide-react';
+import { X, Calendar, Shield, Ruler, User, MessageSquare, Star, FileDown } from 'lucide-react';
 import { motion } from 'motion/react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import EvaluationsList from './EvaluationsList';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface PlayerDetailProps {
   player: Jugador;
@@ -12,9 +14,45 @@ interface PlayerDetailProps {
 }
 
 export default function PlayerDetail({ player, onClose }: PlayerDetailProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const exportToPDF = async () => {
+    if (!contentRef.current) return;
+    
+    // We want to capture the whole modal, but maybe without the close button
+    const element = contentRef.current;
+    
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#0f172a', // Match slate-900
+        logging: false,
+        onclone: (clonedDoc) => {
+          // Hide both top buttons in the PDF
+          const buttons = clonedDoc.querySelectorAll('button');
+          buttons.forEach(btn => (btn as HTMLElement).style.display = 'none');
+        }
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Perfil_${player.nombre}_${player.apellidos}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center z-50 p-4 md:p-8 overflow-y-auto selection:bg-indigo-500/30">
       <motion.div 
+        ref={contentRef}
         initial={{ opacity: 0, y: 50, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         className="bg-slate-900 border border-slate-800 rounded-[3rem] w-full max-w-5xl overflow-hidden shadow-[0_0_100px_rgba(99,102,241,0.1)] flex flex-col md:flex-row min-h-[600px] relative"
@@ -24,6 +62,14 @@ export default function PlayerDetail({ player, onClose }: PlayerDetailProps) {
           className="absolute top-6 right-6 p-3 bg-slate-800/80 hover:bg-slate-700 text-white rounded-2xl transition-all border border-slate-700/50 z-20"
         >
           <X className="w-6 h-6" />
+        </button>
+
+        <button 
+          onClick={exportToPDF}
+          className="absolute top-6 right-20 p-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl transition-all border border-indigo-400/30 z-20 shadow-lg shadow-indigo-500/20 group"
+          title="Exportar PDF"
+        >
+          <FileDown className="w-6 h-6 group-active:scale-95 transition-transform" />
         </button>
 
         {/* Left Side: Photo & Identity */}
