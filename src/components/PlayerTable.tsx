@@ -26,6 +26,7 @@ export default function PlayerTable({ players, onEdit, onDelete, onView }: Playe
             <tr className="border-b border-slate-800 bg-slate-900/50">
               <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Dorsal</th>
               <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Jugador</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Val.</th>
               <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Evaluación</th>
               <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Talla</th>
               <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Nacimiento</th>
@@ -53,6 +54,11 @@ export default function PlayerTable({ players, onEdit, onDelete, onView }: Playe
                       <p className="font-bold text-white text-sm tracking-tight">{player.nombre} {player.apellidos}</p>
                       <p className="text-[10px] font-bold text-indigo-400/60 uppercase tracking-widest">{player.equipo}</p>
                     </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="font-black text-indigo-400 text-xs bg-indigo-500/10 px-2 py-1 rounded-lg w-fit">
+                    {player.valoracion_inicial || '-'}
                   </div>
                 </td>
                 <td className="px-6 py-4">

@@ -69,6 +69,25 @@ export default function App() {
     }
   };
 
+  const seedDatabase = async () => {
+    if (!confirm('¿Quieres importar los 20 jugadores solicitados a la base de datos?')) return;
+    setLoading(true);
+    try {
+      const playersToSeed = MOCK_PLAYERS.map(p => {
+        const { id, ...rest } = p;
+        return rest;
+      });
+      const { error } = await supabase.from('jugadores').insert(playersToSeed);
+      if (error) throw error;
+      alert('¡Jugadores importados con éxito!');
+      fetchPlayers();
+    } catch (err: any) {
+      alert('Error al importar: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSavePlayer = async (data: Partial<Jugador>) => {
     try {
       if (selectedPlayer) {
@@ -159,6 +178,14 @@ export default function App() {
             <div className="hidden md:flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-bold border border-emerald-500/20 uppercase tracking-wider">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Connected
             </div>
+            <button 
+              onClick={seedDatabase}
+              className="bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-indigo-500/20 transition-all font-bold text-xs border border-indigo-500/20 animate-pulse"
+              title="Importar los 20 jugadores a la base de datos"
+            >
+              <Database className="w-4 h-4" /> 
+              <span>Importar 20 Jugadores</span>
+            </button>
             <button 
               onClick={() => { setShowForm(true); setSelectedPlayer(undefined); }}
               className="bg-indigo-500 text-white px-5 py-2 rounded-xl flex items-center gap-2 hover:bg-indigo-600 transition-all font-bold text-sm active:scale-95 shadow-lg shadow-indigo-500/20"
@@ -313,7 +340,23 @@ CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id 
           </motion.div>
         )}
 
-        {loading ? (
+        {players.length === 0 && !loading ? (
+          <div className="py-24 flex flex-col items-center justify-center bg-slate-900/20 rounded-[3rem] border-2 border-dashed border-slate-800">
+            <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-6">
+              <Users className="w-10 h-10 text-indigo-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Plantilla Vacía</h3>
+            <p className="text-slate-500 text-sm mb-8 max-w-sm text-center font-medium">
+              Detectamos la lista de los 20 jugadores pendientes de importar. ¿Deseas cargarlos ahora?
+            </p>
+            <button
+              onClick={seedDatabase}
+              className="flex items-center gap-3 bg-indigo-500 hover:bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 shadow-xl shadow-indigo-500/20"
+            >
+              <Database className="w-5 h-5" /> Importar 20 Jugadores Solicitados
+            </button>
+          </div>
+        ) : loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
@@ -351,19 +394,8 @@ CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id 
           />
         )}
 
-        {filteredPlayers.length === 0 && !loading && (
-          <div className="text-center py-32 bg-slate-900/20 rounded-[2.5rem] border-2 border-dashed border-slate-800/50">
-            <div className="w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Users className="w-10 h-10 text-slate-600" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-300">No se encontraron jugadores</h3>
-            <p className="text-slate-500 max-w-xs mx-auto mt-2 font-medium">Prueba a cambiar los filtros aplicados arriba.</p>
-            <button 
-              onClick={() => { setFilterTalla('all'); }}
-              className="mt-8 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-8 py-3 rounded-2xl font-bold hover:bg-indigo-500 hover:text-white transition-all active:scale-95"
-            >
-              Limpiar Filtros
-            </button>
+        {players.length === 0 && !loading && (
+          <div className="hidden">
           </div>
         )}
       </main>

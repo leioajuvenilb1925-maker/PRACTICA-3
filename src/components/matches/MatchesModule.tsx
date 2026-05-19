@@ -6,8 +6,9 @@ import RivalReport from './RivalReport';
 import MatchPlan from './MatchPlan';
 import LiveEvents from './LiveEvents';
 import MatchRegistration from './MatchRegistration';
+import LineupEditor from './LineupEditor';
 
-export type MatchTab = 'teams' | 'rival' | 'plan' | 'live' | 'create';
+export type MatchTab = 'teams' | 'rival' | 'plan' | 'live' | 'create' | 'lineup';
 
 export default function MatchesModule() {
   const [activeTab, setActiveTab] = useState<MatchTab>('teams');
@@ -16,8 +17,9 @@ export default function MatchesModule() {
     { id: 'teams', label: 'Equipos', icon: Users, color: 'text-blue-400' },
     { id: 'create', label: 'Alta Partido', icon: Plus, color: 'text-white' },
     { id: 'rival', label: 'Informe Rival', icon: FileText, color: 'text-amber-400' },
+    { id: 'lineup', label: 'Alineación', icon: Trophy, color: 'text-indigo-400' },
     { id: 'plan', label: 'Plan Partido', icon: ClipboardList, color: 'text-emerald-400' },
-    { id: 'live', label: 'En Directo', icon: Radio, color: 'text-rose-400' },
+    { id: 'live', label: 'Eventos', icon: Radio, color: 'text-rose-400' },
   ] as const;
 
   return (
@@ -53,6 +55,7 @@ export default function MatchesModule() {
             {activeTab === 'teams' && <TeamsList />}
             {activeTab === 'create' && <MatchRegistration />}
             {activeTab === 'rival' && <RivalReport />}
+            {activeTab === 'lineup' && <LineupEditor />}
             {activeTab === 'plan' && <MatchPlan />}
             {activeTab === 'live' && <LiveEvents />}
           </motion.div>

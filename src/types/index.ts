@@ -33,6 +33,7 @@ export interface Jugador {
   demarcacion: Demarcacion;
   talla: number;
   equipo: string;
+  valoracion_inicial?: number;
   foto_jugador?: string;
   observaciones?: string;
   created_at: string;

@@ -71,39 +71,12 @@ export default function LiveEvents() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
-      {/* Left & Middle: Video & Controls */}
+      {/* Left & Middle: Controls & Video */}
       <div className="lg:col-span-2 space-y-6">
-        {/* Video Player */}
-        <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-slate-800 space-y-4">
-          <div className="flex items-center gap-3 mb-2 px-2">
-            <Youtube className="w-5 h-5 text-rose-500" />
-            <input 
-              type="text"
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="URL del partido en vivo (YouTube)..."
-              className="bg-transparent text-sm text-slate-300 placeholder:text-slate-600 outline-none flex-1 border-b border-slate-800 focus:border-indigo-500 transition-colors pb-1"
-            />
-          </div>
-          <div className="aspect-video w-full bg-black rounded-3xl overflow-hidden border border-slate-800">
-             {embedUrl ? (
-               <iframe src={embedUrl} className="w-full h-full" allowFullScreen></iframe>
-             ) : (
-               <div className="w-full h-full flex flex-col items-center justify-center space-y-4 opacity-10">
-                  <Youtube className="w-24 h-24" />
-                  <p className="font-black uppercase tracking-widest text-xs">Sin señal de video</p>
-               </div>
-             )}
-          </div>
-        </div>
-
-        {/* Action Center */}
+        {/* Action Center - Moved to top */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
            {/* Stopwatch */}
            <div className="bg-slate-900/40 p-8 rounded-[2.5rem] border border-slate-800 flex flex-col items-center justify-center text-center">
-              <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                <Timer className="w-3 h-3" /> Tiempo de Juego
-              </div>
               <div className="text-6xl font-mono font-black text-white tabular-nums mb-8 tracking-tighter">
                 {formatTime(seconds)}
               </div>
@@ -129,11 +102,8 @@ export default function LiveEvents() {
            {/* Stats Record */}
            <div className="bg-slate-900/40 p-8 rounded-[2.5rem] border border-slate-800 space-y-8">
               <div className="space-y-4">
-                 <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                      <Trophy className="w-3 h-3 text-amber-500" /> Marcador
-                    </span>
-                    <span className="text-xl font-black text-indigo-400">{score.favor} - {score.contra}</span>
+                 <div className="flex items-center justify-center mb-2">
+                    <span className="text-3xl font-black text-indigo-400">{score.favor} - {score.contra}</span>
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -153,12 +123,9 @@ export default function LiveEvents() {
                  </div>
               </div>
 
-              <div className="space-y-4">
-                 <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                      <Target className="w-3 h-3 text-blue-500" /> Ocasiones
-                    </span>
-                    <span className="text-xl font-black text-slate-400">{occasions.favor} - {occasions.contra}</span>
+              <div className="space-y-4 border-t border-slate-800 pt-6">
+                 <div className="flex items-center justify-center mb-2">
+                    <span className="text-xl font-black text-slate-400">{occasions.favor} - {occasions.contra} <span className="text-[10px] text-slate-600 ml-2">OCASIONES</span></span>
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -176,6 +143,30 @@ export default function LiveEvents() {
                  </div>
               </div>
            </div>
+        </div>
+
+        {/* Video Player - Moved below controls */}
+        <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-slate-800 space-y-4">
+          <div className="flex items-center gap-3 mb-2 px-2">
+            <Youtube className="w-5 h-5 text-rose-500" />
+            <input 
+              type="text"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="URL del partido en vivo (YouTube)..."
+              className="bg-transparent text-sm text-slate-300 placeholder:text-slate-600 outline-none flex-1 border-b border-slate-800 focus:border-indigo-500 transition-colors pb-1"
+            />
+          </div>
+          <div className="aspect-video w-full bg-black rounded-3xl overflow-hidden border border-slate-800">
+             {embedUrl ? (
+               <iframe src={embedUrl} title="Live Match" className="w-full h-full" allowFullScreen></iframe>
+             ) : (
+               <div className="w-full h-full flex flex-col items-center justify-center space-y-4 opacity-10">
+                  <Youtube className="w-24 h-24" />
+                  <p className="font-black uppercase tracking-widest text-xs">Sin señal de video</p>
+               </div>
+             )}
+          </div>
         </div>
       </div>
 
