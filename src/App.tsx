@@ -4,11 +4,7 @@ import { Jugador } from './types';
 import Auth from './components/Auth';
 import PlayerCard from './components/PlayerCard';
 import PlayerForm from './components/PlayerForm';
-import PlayerDetail from './components/PlayerDetail';
-import PlayerTable from './components/PlayerTable';
-import EvaluationsDashboard from './components/EvaluationsDashboard';
-import MatchesModule from './components/matches/MatchesModule';
-import { Plus, LogOut, Users, Settings, Database, Loader2, AlertTriangle, LayoutGrid, List, BarChart3, Star, Trophy } from 'lucide-react';
+import { Plus, LogOut, Users, Settings, Database, Loader2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_PLAYERS } from './constants/mockData';
 
@@ -17,10 +13,6 @@ export default function App() {
   const [players, setPlayers] = useState<Jugador[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [showDetail, setShowDetail] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
-  const [currentTab, setCurrentTab] = useState<'roster' | 'evaluations' | 'matches'>('roster');
-  const [filterTalla, setFilterTalla] = useState<string>('all');
   const [selectedPlayer, setSelectedPlayer] = useState<Jugador | undefined>();
   const [viewSql, setViewSql] = useState(false);
 
@@ -51,7 +43,7 @@ export default function App() {
 
       const { data, error } = await supabase
         .from('jugadores')
-        .select('*, evaluaciones(*)')
+        .select('*')
         .order('dorsal', { ascending: true });
 
       if (error) throw error;
@@ -64,25 +56,6 @@ export default function App() {
     } catch (err) {
       console.warn('Usando datos locales:', err);
       setPlayers(MOCK_PLAYERS as Jugador[]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const seedDatabase = async () => {
-    if (!confirm('¿Quieres importar los 20 jugadores solicitados a la base de datos?')) return;
-    setLoading(true);
-    try {
-      const playersToSeed = MOCK_PLAYERS.map(p => {
-        const { id, ...rest } = p;
-        return rest;
-      });
-      const { error } = await supabase.from('jugadores').insert(playersToSeed);
-      if (error) throw error;
-      alert('¡Jugadores importados con éxito!');
-      fetchPlayers();
-    } catch (err: any) {
-      alert('Error al importar: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -113,26 +86,13 @@ export default function App() {
   const handleDeletePlayer = async (id: string) => {
     if (!confirm('¿Seguro que quieres eliminar a este jugador?')) return;
     try {
-      if (isSupabaseConfigured) {
-        const { error } = await supabase.from('jugadores').delete().eq('id', id);
-        if (error) throw error;
-      }
-      
-      // Actualizamos el estado local siempre para que el usuario vea el cambio (especialmente en modo demo)
-      setPlayers(prev => prev.filter(p => p.id !== id));
+      const { error } = await supabase.from('jugadores').delete().eq('id', id);
+      if (error) throw error;
+      fetchPlayers();
     } catch (err: any) {
-       console.error('Error al eliminar:', err);
-       alert('Error al eliminar de la base de datos: ' + err.message);
+       alert('Error al eliminar: ' + err.message);
     }
   };
-
-  const filteredPlayers = players.filter(p => {
-    let tallaMatch = true;
-    if (filterTalla === 'tall') tallaMatch = p.talla >= 185;
-    else if (filterTalla === 'medium') tallaMatch = p.talla >= 175 && p.talla < 185;
-    else if (filterTalla === 'short') tallaMatch = p.talla < 175;
-    return tallaMatch;
-  });
 
   if (!session) {
     return <Auth />;
@@ -149,43 +109,11 @@ export default function App() {
             </div>
             <h1 className="text-xl font-bold tracking-tight hidden sm:block">TEAM<span className="text-indigo-400">MANAGER</span> <span className="text-slate-500 text-xs font-normal ml-2">PRO v2.0</span></h1>
           </div>
-
-          <div className="flex bg-slate-900/40 p-1 rounded-xl shadow-inner border border-slate-800 ml-auto mr-4">
-             <button 
-               onClick={() => setCurrentTab('roster')}
-               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentTab === 'roster' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-300'}`}
-             >
-               <Users className="w-4 h-4" />
-               Plantilla
-             </button>
-             <button 
-               onClick={() => setCurrentTab('evaluations')}
-               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentTab === 'evaluations' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-300'}`}
-             >
-               <Star className="w-4 h-4" />
-               Evaluaciones
-             </button>
-             <button 
-               onClick={() => setCurrentTab('matches')}
-               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentTab === 'matches' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-300'}`}
-             >
-               <Trophy className="w-4 h-4" />
-               Partidos
-             </button>
-          </div>
           
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-bold border border-emerald-500/20 uppercase tracking-wider">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Connected
             </div>
-            <button 
-              onClick={seedDatabase}
-              className="bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-indigo-500/20 transition-all font-bold text-xs border border-indigo-500/20 animate-pulse"
-              title="Importar los 20 jugadores a la base de datos"
-            >
-              <Database className="w-4 h-4" /> 
-              <span>Importar 20 Jugadores</span>
-            </button>
             <button 
               onClick={() => { setShowForm(true); setSelectedPlayer(undefined); }}
               className="bg-indigo-500 text-white px-5 py-2 rounded-xl flex items-center gap-2 hover:bg-indigo-600 transition-all font-bold text-sm active:scale-95 shadow-lg shadow-indigo-500/20"
@@ -211,41 +139,10 @@ export default function App() {
                <span className="px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded border border-indigo-500/20 text-[10px] uppercase font-bold tracking-widest">Temporada 24/25</span>
             </div>
             <h2 className="text-4xl font-extrabold tracking-tight">Plantilla Actual</h2>
-            <p className="text-slate-500 font-medium tracking-wide">Gestionando {filteredPlayers.length} perfiles activos de {players.length} totales</p>
+            <p className="text-slate-500 font-medium tracking-wide">Gestionando {players.length} perfiles activos en la base de datos</p>
           </div>
           
-          <div className="flex flex-wrap gap-3 self-start">
-             {/* Filtros */}
-             <div className="flex bg-slate-900/40 p-1 rounded-xl shadow-inner border border-slate-800">
-                <select 
-                  value={filterTalla}
-                  onChange={(e) => setFilterTalla(e.target.value)}
-                  className="bg-transparent text-slate-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 outline-none cursor-pointer hover:text-white transition-colors"
-                >
-                  <option value="all">Estatura: Todas</option>
-                  <option value="tall">Altos (+185cm)</option>
-                  <option value="medium">Media (175-185cm)</option>
-                  <option value="short">Bajos (-175cm)</option>
-                </select>
-             </div>
-
-             <div className="flex bg-slate-900/40 p-1 rounded-xl shadow-inner border border-slate-800">
-             <div className="flex border-r border-slate-800 pr-1 mr-1">
-               <button 
-                 onClick={() => setViewMode('grid')}
-                 className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                 title="Vista Cuadrícula"
-               >
-                 <LayoutGrid className="w-4 h-4" />
-               </button>
-               <button 
-                 onClick={() => setViewMode('table')}
-                 className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                 title="Vista Tabla"
-               >
-                 <List className="w-4 h-4" />
-               </button>
-             </div>
+          <div className="flex bg-slate-900/40 p-1 rounded-xl shadow-inner border border-slate-800 self-start">
              <button 
                onClick={() => setViewSql(!viewSql)}
                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${viewSql ? 'bg-indigo-500 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-800/50'}`}
@@ -254,7 +151,6 @@ export default function App() {
              </button>
           </div>
         </div>
-      </div>
 
         {!isSupabaseConfigured && (
           <motion.div 
@@ -297,66 +193,30 @@ CREATE TABLE jugadores (
   apellidos TEXT NOT NULL,
   dorsal INTEGER,
   fecha_nacimiento DATE,
-  talla INTEGER,
+  demarcacion TEXT,
+  lateralidad TEXT,
   equipo TEXT,
   foto_jugador TEXT,
   observaciones TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- NUEVA TABLA: Evaluaciones
-CREATE TABLE evaluaciones (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  jugador_id UUID REFERENCES jugadores(id) ON DELETE CASCADE,
-  puntuacion INTEGER CHECK (puntuacion >= 1 AND puntuacion <= 10),
-  comentario TEXT,
-  fecha DATE DEFAULT CURRENT_DATE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
 -- 2. SEGURIDAD (RLS)
 ALTER TABLE jugadores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE evaluaciones ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Todo para autenticados" ON jugadores FOR ALL TO authenticated USING (true);
 
--- Política integral para usuarios autenticados
-CREATE POLICY "Gestión total para autenticados" ON jugadores 
-  FOR ALL 
-  TO authenticated 
-  USING (true) 
-  WITH CHECK (true);
+-- 3. STORAGE (Crea el bucket 'jugadores' primero)
+-- Ejecuta esto después de crear el bucket manualmente en la UI
+INSERT INTO storage.buckets (id, name, public) VALUES ('jugadores', 'jugadores', true);
 
-CREATE POLICY "Gestión evaluaciones para autenticados" ON evaluaciones 
-  FOR ALL 
-  TO authenticated 
-  USING (true) 
-  WITH CHECK (true);
-
--- 3. STORAGE (Importante: Crea el bucket 'jugadores' en la UI de Supabase primero)
--- Políticas para el bucket 'jugadores':
-CREATE POLICY "Public Read" ON storage.objects FOR SELECT USING (bucket_id = 'jugadores');
+CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING (bucket_id = 'jugadores');
 CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'jugadores' AND auth.role() = 'authenticated');`}
               </pre>
             </div>
           </motion.div>
         )}
 
-        {players.length === 0 && !loading ? (
-          <div className="py-24 flex flex-col items-center justify-center bg-slate-900/20 rounded-[3rem] border-2 border-dashed border-slate-800">
-            <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-6">
-              <Users className="w-10 h-10 text-indigo-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2">Plantilla Vacía</h3>
-            <p className="text-slate-500 text-sm mb-8 max-w-sm text-center font-medium">
-              Detectamos la lista de los 20 jugadores pendientes de importar. ¿Deseas cargarlos ahora?
-            </p>
-            <button
-              onClick={seedDatabase}
-              className="flex items-center gap-3 bg-indigo-500 hover:bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-95 shadow-xl shadow-indigo-500/20"
-            >
-              <Database className="w-5 h-5" /> Importar 20 Jugadores Solicitados
-            </button>
-          </div>
-        ) : loading ? (
+        {loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
@@ -366,56 +226,47 @@ CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id 
             </div>
             <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Cargando Plantilla...</p>
           </div>
-        ) : currentTab === 'evaluations' ? (
-          <EvaluationsDashboard />
-        ) : currentTab === 'matches' ? (
-          <MatchesModule />
-        ) : viewMode === 'grid' ? (
+        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
-              {filteredPlayers.map((player) => (
+              {players.map((player) => (
                 <div key={player.id || `${player.nombre}-${player.dorsal}`}>
                   <PlayerCard 
                     player={player} 
                     onEdit={(p) => { setSelectedPlayer(p); setShowForm(true); }}
-                    onView={(p) => { setSelectedPlayer(p); setShowDetail(true); }}
                     onDelete={handleDeletePlayer}
                   />
                 </div>
               ))}
             </AnimatePresence>
           </div>
-        ) : (
-          <PlayerTable 
-            players={filteredPlayers}
-            onEdit={(p) => { setSelectedPlayer(p); setShowForm(true); }}
-            onView={(p) => { setSelectedPlayer(p); setShowDetail(true); }}
-            onDelete={handleDeletePlayer}
-          />
         )}
 
         {players.length === 0 && !loading && (
-          <div className="hidden">
+          <div className="text-center py-32 bg-slate-900/20 rounded-[2.5rem] border-2 border-dashed border-slate-800/50">
+            <div className="w-20 h-20 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Users className="w-10 h-10 text-slate-600" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-300">No hay jugadores registrados</h3>
+            <p className="text-slate-500 max-w-xs mx-auto mt-2 font-medium">Comienza a construir tu equipo ideal añadiendo el primer perfil.</p>
+            <button 
+              onClick={() => setShowForm(true)}
+              className="mt-8 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-8 py-3 rounded-2xl font-bold hover:bg-indigo-500 hover:text-white transition-all active:scale-95"
+            >
+              Crear Perfil Inicial
+            </button>
           </div>
         )}
       </main>
 
       {/* Modals */}
-      <AnimatePresence>
-        {showForm && (
-          <PlayerForm 
-            player={selectedPlayer}
-            onSave={handleSavePlayer}
-            onClose={() => { setShowForm(false); setSelectedPlayer(undefined); }}
-          />
-        )}
-        {showDetail && selectedPlayer && (
-          <PlayerDetail 
-            player={selectedPlayer} 
-            onClose={() => { setShowDetail(false); setSelectedPlayer(undefined); }} 
-          />
-        )}
-      </AnimatePresence>
+      {showForm && (
+        <PlayerForm 
+          player={selectedPlayer}
+          onSave={handleSavePlayer}
+          onClose={() => { setShowForm(false); setSelectedPlayer(undefined); }}
+        />
+      )}
 
       {/* Footer */}
       <footer className="mt-20 py-12 border-t border-slate-900 bg-slate-950/80 backdrop-blur-sm">

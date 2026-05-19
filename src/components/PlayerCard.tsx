@@ -1,5 +1,5 @@
 import { Jugador } from '../types';
-import { Pencil, Trash2, Calendar, Shield, Ruler, Eye } from 'lucide-react';
+import { Pencil, Trash2, Calendar, Shield, MoveHorizontal as MoveH } from 'lucide-react';
 import { motion } from 'motion/react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -8,10 +8,9 @@ interface PlayerCardProps {
   player: Jugador;
   onEdit: (player: Jugador) => void;
   onDelete: (id: string) => void;
-  onView: (player: Jugador) => void;
 }
 
-export default function PlayerCard({ player, onEdit, onDelete, onView }: PlayerCardProps) {
+export default function PlayerCard({ player, onEdit, onDelete }: PlayerCardProps) {
   const getDemarcacionColor = (dem: string) => {
     switch (dem) {
       case 'Portero': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
@@ -48,23 +47,14 @@ export default function PlayerCard({ player, onEdit, onDelete, onView }: PlayerC
         
         <div className="absolute top-5 right-5 flex gap-2 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
           <button 
-            onClick={() => onView(player)}
-            className="p-2.5 bg-black/60 backdrop-blur-md hover:bg-slate-100 hover:text-slate-900 text-white rounded-xl shadow-2xl border border-white/5 transition-all"
-            title="Ver Detalle"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-          <button 
             onClick={() => onEdit(player)}
             className="p-2.5 bg-black/60 backdrop-blur-md hover:bg-indigo-500 text-white rounded-xl shadow-2xl border border-white/5 transition-all"
-            title="Editar"
           >
             <Pencil className="w-4 h-4" />
           </button>
           <button 
             onClick={() => onDelete(player.id)}
             className="p-2.5 bg-black/60 backdrop-blur-md hover:bg-rose-600 text-white rounded-xl shadow-2xl border border-white/5 transition-all"
-            title="Eliminar"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -90,7 +80,7 @@ export default function PlayerCard({ player, onEdit, onDelete, onView }: PlayerC
             {player.demarcacion}
           </div>
           <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-slate-800 bg-slate-800/30 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-            <Ruler className="w-3 h-3" /> {player.talla} cm
+            {player.lateralidad}
           </div>
         </div>
 

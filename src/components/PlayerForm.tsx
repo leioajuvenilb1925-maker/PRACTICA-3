@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Jugador, Demarcacion } from '../types';
+import { Jugador, Demarcacion, Lateralidad } from '../types';
 import { X, Save } from 'lucide-react';
 import ImageUpload from './ImageUpload';
 import { motion } from 'motion/react';
@@ -18,7 +18,7 @@ export default function PlayerForm({ player, onSave, onClose }: PlayerFormProps)
       dorsal: 0,
       fecha_nacimiento: '',
       demarcacion: 'Centrocampista',
-      talla: 175,
+      lateralidad: 'Diestro',
       equipo: '',
       foto_jugador: '',
       observaciones: ''
@@ -101,15 +101,28 @@ export default function PlayerForm({ player, onSave, onClose }: PlayerFormProps)
                 />
               </div>
               <div className="col-span-1 space-y-2">
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Estatura (cm)</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Posición</label>
                 <select
-                  value={formData.talla}
-                  onChange={(e) => setFormData(prev => ({ ...prev, talla: parseInt(e.target.value) }))}
+                  value={formData.demarcacion}
+                  onChange={(e) => setFormData(prev => ({ ...prev, demarcacion: e.target.value as Demarcacion }))}
                   className="w-full bg-slate-950/50 border border-slate-800 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
                 >
-                  {Array.from({ length: 31 }, (_, i) => 160 + i).map(height => (
-                    <option key={height} value={height}>{height} cm</option>
-                  ))}
+                  <option value="Portero">Portero</option>
+                  <option value="Defensa">Defensa</option>
+                  <option value="Centrocampista">Centrocampista</option>
+                  <option value="Delantero">Delantero</option>
+                </select>
+              </div>
+              <div className="col-span-1 space-y-2">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Lateralidad</label>
+                <select
+                  value={formData.lateralidad}
+                  onChange={(e) => setFormData(prev => ({ ...prev, lateralidad: e.target.value as Lateralidad }))}
+                  className="w-full bg-slate-950/50 border border-slate-800 text-white px-5 py-3 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
+                >
+                  <option value="Diestro">Diestro</option>
+                  <option value="Zurdo">Zurdo</option>
+                  <option value="Ambidiestro">Ambidiestro</option>
                 </select>
               </div>
               <div className="col-span-2 space-y-2">
