@@ -7,7 +7,8 @@ import PlayerForm from './components/PlayerForm';
 import PlayerDetail from './components/PlayerDetail';
 import PlayerTable from './components/PlayerTable';
 import EvaluationsDashboard from './components/EvaluationsDashboard';
-import { Plus, LogOut, Users, Settings, Database, Loader2, AlertTriangle, LayoutGrid, List, BarChart3, Star } from 'lucide-react';
+import MatchesModule from './components/matches/MatchesModule';
+import { Plus, LogOut, Users, Settings, Database, Loader2, AlertTriangle, LayoutGrid, List, BarChart3, Star, Trophy } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_PLAYERS } from './constants/mockData';
 
@@ -18,7 +19,7 @@ export default function App() {
   const [showForm, setShowForm] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
-  const [currentTab, setCurrentTab] = useState<'roster' | 'evaluations'>('roster');
+  const [currentTab, setCurrentTab] = useState<'roster' | 'evaluations' | 'matches'>('roster');
   const [filterTalla, setFilterTalla] = useState<string>('all');
   const [selectedPlayer, setSelectedPlayer] = useState<Jugador | undefined>();
   const [viewSql, setViewSql] = useState(false);
@@ -144,6 +145,13 @@ export default function App() {
              >
                <Star className="w-4 h-4" />
                Evaluaciones
+             </button>
+             <button 
+               onClick={() => setCurrentTab('matches')}
+               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentTab === 'matches' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-300'}`}
+             >
+               <Trophy className="w-4 h-4" />
+               Partidos
              </button>
           </div>
           
@@ -317,6 +325,8 @@ CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id 
           </div>
         ) : currentTab === 'evaluations' ? (
           <EvaluationsDashboard />
+        ) : currentTab === 'matches' ? (
+          <MatchesModule />
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>

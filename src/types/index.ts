@@ -9,6 +9,21 @@ export interface Evaluacion {
   created_at?: string;
 }
 
+export interface Team {
+  id: string;
+  nombre: string;
+  escudo?: string;
+  user_id?: string;
+  created_at?: string;
+}
+
+export interface MatchEvent {
+  id: string;
+  tiempo: string;
+  tipo: 'Gol Favor' | 'Gol Contra' | 'Ocasión Favor' | 'Ocasión Contra';
+  descripcion: string;
+}
+
 export interface Jugador {
   id: string;
   nombre: string;
